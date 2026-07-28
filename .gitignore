@@ -1,0 +1,46 @@
+# ===== 민감정보 (절대 커밋 금지) =====
+application-secret.properties
+*-secret.properties
+!*-secret.properties.example
+*.env
+.env
+
+# ===== 백엔드 (Gradle / Spring Boot) =====
+backend/.gradle/
+backend/build/
+backend/bin/
+backend/out/
+backend/HELP.md
+!backend/gradle/wrapper/gradle-wrapper.jar
+
+# ===== 프론트엔드 (Node / Vite) =====
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# ===== 로그 =====
+*.log
+logs/
+npm-debug.log*
+
+# ===== IDE / 편집기 =====
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+.apt_generated/
+.factorypath
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# ===== OS =====
+Thumbs.db
+.DS_Store
+
+# ===== 개인 문서 (공개 저장소에 올리지 않음) =====
+이력서_자소서_초안.md
