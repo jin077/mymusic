@@ -38,7 +38,7 @@ Spring Boot + React로 만든 음악 서비스입니다.
 
 **인프라**
 - nginx (리버스 프록시 · 정적 파일 서빙 · SPA fallback)
-- Docker *(작업 예정)*
+- Docker · Docker Compose (백엔드 · nginx · MariaDB 3계층 컨테이너화)
 
 **외부 API** (둘 다 인증 키 불필요)
 - iTunes Search API — 곡 검색, 미리듣기 주소
@@ -91,6 +91,31 @@ practice/
 ---
 
 ## 실행 방법
+
+### 방법 A. Docker (권장)
+
+**Docker Desktop만 있으면 됩니다.** JDK·Node·MariaDB를 설치하지 않아도 되고,
+스키마·계정 생성도 필요 없습니다.
+
+```bash
+cp .env.example .env      # DB 계정과 JWT 서명키를 채운다
+docker compose up -d      # → http://localhost
+```
+
+MariaDB → 백엔드 → nginx 순서로 뜹니다.
+백엔드는 DB가 실제로 접속을 받을 준비가 될 때까지(healthcheck) 기다렸다가 시작합니다.
+
+```bash
+docker compose ps          # 상태 확인
+docker compose logs -f     # 로그 실시간
+docker compose down        # 정지 (DB 데이터는 볼륨에 남음)
+```
+
+아래 방법 B의 준비 과정 5단계가 명령 두 줄로 줄어듭니다.
+
+---
+
+### 방법 B. 직접 실행
 
 **1. 사전 준비**
 - JDK 17, Node.js, MariaDB
@@ -149,7 +174,18 @@ nginx.exe                                            # http://localhost
 `Member` 엔티티를 그대로 반환하면 비밀번호 해시가 응답 JSON에 노출됩니다.
 `MemberDto`로 필요한 필드(id·username·role)만 담아 내보냅니다.
 
-### 4. 비밀값을 코드에서 분리한 방법
+### 4. 컨테이너 구성에서 판단한 것
+
+| 판단 | 이유 |
+|---|---|
+| **외부에 여는 포트는 80 하나** | 백엔드(8080)·DB(3306)는 `ports`를 지정하지 않아 컨테이너 네트워크 안에서만 접근됩니다. nginx를 앞에 둔 이유가 여기서 완성됩니다 |
+| **프론트는 멀티스테이지 빌드** | Node로 빌드한 뒤 결과물만 nginx 이미지로 옮깁니다. 최종 이미지에 Node·node_modules가 남지 않아 **26MB**입니다 |
+| **DB는 공식 이미지 + 환경변수** | 설치·스키마 생성·계정 부여가 환경변수 4줄로 대체됩니다 |
+| **DB 데이터는 볼륨에 보관** | 컨테이너를 지웠다 다시 만들어도 회원 데이터가 유지됩니다 |
+| **비밀값은 이미지에 넣지 않음** | 이미지는 레지스트리로 공유되므로 비밀이 함께 퍼집니다. 실행 시 `.env`로 주입합니다 |
+| **컨테이너 간 통신은 서비스 이름으로** | 컨테이너 안에서 `localhost`는 자기 자신을 가리킵니다. `backend:8080`처럼 이름을 씁니다 |
+
+### 5. 비밀값을 코드에서 분리한 방법
 
 `application.properties`에는 비밀값을 두지 않고, 실행 폴더의 `application-secret.properties`를 읽습니다.
 
@@ -233,7 +269,7 @@ Client Credentials 방식의 메타데이터 조회가 제한되고 개발 모�
 
 ## 앞으로
 
-- [ ] Docker · Docker Compose로 컨테이너화
-- [ ] 리눅스 환경 배포
+- [x] Docker · Docker Compose로 컨테이너화
+- [ ] 리눅스 서버 배포 (클라우드)
 - [ ] 재생목록 저장 (회원 기능 확장)
 - [ ] 응답 캐시 정책 개선
