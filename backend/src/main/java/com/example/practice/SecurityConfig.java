@@ -18,6 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 /**
  * 시큐리티 설정 (3단계: JWT 인증).
  *
@@ -75,6 +77,25 @@ public class SecurityConfig {
                 .requestMatchers("/api/music/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")    // /api/admin/** 은 관리자만
                 .anyRequest().authenticated()                     // 그 외는 인증 필요
+            )
+            // ⭐ 인증 실패(401) 와 인가 실패(403) 를 제대로 구분해서 응답한다.
+            //
+            //   왜 필요한가?
+            //     시큐리티는 "인증 실패 시 뭘 할지" 담당자(AuthenticationEntryPoint)를 하나 갖는다.
+            //     formLogin()이면 로그인 페이지로 보내고, httpBasic()이면 401을 낸다.
+            //     그런데 JWT로 바꾸면서 둘 다 제거했으므로 기본값인 Http403ForbiddenEntryPoint가
+            //     쓰이고, 그 결과 "비번 틀림"·"토큰 없음"까지 전부 403으로 나와버렸다.
+            //     → 401과 403이 구분되지 않아 프론트가 대응을 못 한다.
+            //
+            //   401 : 네가 누군지 모르겠다 (토큰 없음·만료·위조, 비번 틀림)
+            //         → 프론트는 로그인 페이지로 보내야 함
+            //   403 : 누군진 알겠는데 자격이 없다 (USER가 /admin 접근)
+            //         → 다시 로그인해도 소용없음. "권한 없음" 안내만 하면 됨
+            .exceptionHandling(ex -> ex
+                    .authenticationEntryPoint((req, res, e) ->
+                            res.sendError(HttpServletResponse.SC_UNAUTHORIZED))  // 401
+                    .accessDeniedHandler((req, res, e) ->
+                            res.sendError(HttpServletResponse.SC_FORBIDDEN))     // 403
             )
             // ⭐ 우리 JWT 문지기 필터를, 기본 로그인 필터보다 "앞"에 끼워넣음.
             //    → 요청이 들어오면 우리 필터가 먼저 토큰을 보고 인증 상태를 세팅.
