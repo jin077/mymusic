@@ -1,0 +1,20 @@
+# docker build 할 때 Docker 엔진으로 "보내지 않을" 것들.
+# 빌드 컨텍스트(현재 폴더 전체)가 통째로 엔진에 전송되므로,
+# 불필요한 것을 빼면 빌드가 빨라지고 비밀값 유출도 막을 수 있다.
+
+# ⚠️ 비밀값 — 이미지에 안 넣더라도 애초에 보내지 않는다
+application-secret.properties
+
+# 빌드 캐시·중간 산출물 (수백 MB)
+.gradle/
+build/classes/
+build/resources/
+build/tmp/
+bin/
+
+# 소스코드 — 우리는 이미 빌드된 jar만 넣으므로 불필요
+src/
+
+# 기타
+*.md
+.git/

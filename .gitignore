@@ -37,6 +37,8 @@ npm-debug.log*
 *.iws
 *.ipr
 .vscode/
+backend/postman/
+backend/.postman/
 
 # ===== OS =====
 Thumbs.db
