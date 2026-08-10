@@ -5,8 +5,12 @@ import Chart from './pages/Chart'
 import Albums from './pages/Albums'
 import Ticket from './pages/Ticket'
 import Search from './pages/Search'
-import Profile from './pages/Profile'
 import Login from './pages/Login'
+import MyPage from './pages/MyPage'
+import Admin from './pages/Admin'
+import Notice from './pages/Notice'
+import NoticeDetail from './pages/NoticeDetail'
+import NoticeWrite from './pages/NoticeWrite'
 
 /**
  * ===== 주소(URL)와 페이지를 연결하는 표 =====
@@ -39,8 +43,18 @@ export default function App() {
         <Route path="/albums" element={<Albums />} />
         <Route path="/ticket" element={<Ticket />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/profile" element={<Profile />} />
+
+        {/* 로그인·회원가입: 한 컴포넌트가 주소로 모드를 나눈다 */}
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Login />} />
+
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="/admin" element={<Admin />} />
+
+        {/* 공지 게시판: 목록 · 글쓰기 · 상세 */}
+        <Route path="/notice" element={<Notice />} />
+        <Route path="/notice/write" element={<NoticeWrite />} />
+        <Route path="/notice/:id" element={<NoticeDetail />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

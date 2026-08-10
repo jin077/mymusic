@@ -24,24 +24,28 @@ body {
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
-/* ---------- 헤더 ---------- */
+/* ---------- 헤더(2단: 위=로고+검색, 아래=메뉴) ---------- */
 .header {
   position: sticky; top: 0; z-index: 10;
   background: #fff;
   border-bottom: 1px solid var(--line);
 }
-.header-inner {
-  max-width: 1080px; margin: 0 auto; padding: 14px 20px;
+.header-top {
+  max-width: 1080px; margin: 0 auto; padding: 16px 20px 12px;
   display: flex; align-items: center; gap: 24px;
 }
-.logo { font-size: 22px; font-weight: 800; color: var(--point); }
-.gnb { display: flex; gap: 20px; font-size: 15px; }
+.header-nav { border-top: 1px solid var(--line); }
+.logo { font-size: 32px; font-weight: 800; color: var(--point); letter-spacing: -0.5px; }
+.gnb {
+  max-width: 1080px; margin: 0 auto; padding: 10px 20px;
+  display: flex; gap: 20px; font-size: 15px;
+}
 .gnb a.active { color: var(--point); font-weight: 700; }
 
-/* 검색창: 헤더에 있어서 어느 페이지에서든 검색 가능 */
-.search-form { margin-left: auto; display: flex; }
+/* 검색창: 헤더에 있어서 어느 페이지에서든 검색 가능. 로고 바로 옆에 붙인다 */
+.search-form { display: flex; }
 .search-form input {
-  width: 220px; padding: 8px 12px;
+  width: 300px; padding: 9px 12px;
   border: 1px solid var(--line); border-right: 0; border-radius: 4px 0 0 4px;
   outline: none;
 }
@@ -50,9 +54,33 @@ button { font-family: inherit; cursor: pointer; }
   background: var(--point); color: #fff; font-weight: 700;
 }
 .auth-btn {
+  display: inline-block;
   padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px;
-  background: #fff; font-size: 13px;
+  background: #fff; font-size: 13px; white-space: nowrap;
 }
+.auth-btn.primary { background: var(--point); border-color: var(--point); color: #fff; font-weight: 700; }
+
+/* 마이메뉴 (헤더 오른쪽) */
+.my-menu {
+  margin-left: auto;   /* 검색창과 떨어져 오른쪽 끝에 붙는다 */
+  display: flex; align-items: center; gap: 10px;
+}
+.my-name { font-size: 14px; font-weight: 700; }
+.my-link {
+  border: 0; background: none; padding: 0;
+  font-size: 13px; color: var(--sub); white-space: nowrap;
+}
+.my-link:hover { color: var(--point); }
+.my-link.active { color: var(--point); font-weight: 700; }
+
+/* 프로필 동그라미 — 아이디 첫 글자를 넣는다 */
+.avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--point); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; flex: none;
+}
+.avatar.big { width: 56px; height: 56px; font-size: 24px; }
 
 /* ---------- 본문 공통 ---------- */
 .page { max-width: 1080px; margin: 0 auto; padding: 28px 20px 40px; }
@@ -62,6 +90,98 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 18px; font-weight: 700; margin: 32px 0 12px;
   display: flex; align-items: center; justify-content: space-between;
 }
+.section-title.small { font-size: 15px; margin: 0 0 8px; }
+.section-title .more { font-size: 13px; font-weight: 400; color: var(--sub); }
+
+/* ---------- 홈: 왼쪽(앨범·장르) + 오른쪽(로그인·차트) 2단 ---------- */
+.home {
+  display: grid; grid-template-columns: 1fr 300px; gap: 28px;
+  align-items: start;
+}
+.home .section-title:first-child { margin-top: 0; }
+.home-side { display: flex; flex-direction: column; gap: 16px; }
+.side-box { border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.login-box { text-align: center; }
+.login-hello {
+  font-size: 14px; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.sub-link { display: inline-block; margin-top: 10px; font-size: 13px; }
+.side-btn {
+  display: block; width: 100%; padding: 10px;
+  border: 0; border-radius: 4px;
+  background: var(--point); color: #fff; font-weight: 700; font-size: 14px;
+  text-align: center;
+}
+/* 좁은 칸이라 차트는 순위 글자와 여백을 줄인다 */
+.home-side .track-row { padding: 8px 0; gap: 8px; }
+.home-side .track-rank { width: 20px; font-size: 13px; }
+.home-side .thumb { width: 36px; height: 36px; }
+.home-side .track-title { font-size: 13px; }
+.home-side .track-artist { font-size: 12px; }
+.home-side .play-btn { width: 28px; height: 28px; font-size: 10px; }
+
+/* 장르 박스 */
+.genre-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px;
+}
+.genre-box {
+  display: flex; align-items: center; justify-content: center;
+  height: 72px; border-radius: 8px;
+  background: #f5f5f5; border: 1px solid var(--line);
+  font-size: 15px; font-weight: 700;
+}
+.genre-box:hover { border-color: var(--point); color: var(--point); }
+
+/* 화면이 좁으면 한 줄로 내린다 */
+@media (max-width: 900px) {
+  .home { grid-template-columns: 1fr; }
+}
+
+/* ---------- 표 (공지 목록 · 회원 목록에서 공통) ---------- */
+.table { border-top: 2px solid #333; }
+.table-head, .table-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 8px; border-bottom: 1px solid var(--line); font-size: 14px;
+}
+.table-head { font-weight: 700; background: #fafafa; color: #555; }
+.table-row:hover { background: #fafafa; }
+.col-id { width: 56px; text-align: center; color: var(--sub); }
+.col-title { flex: 1; font-weight: 600; }
+.col-name { width: 120px; }
+.col-role { width: 90px; }
+.col-date { width: 100px; color: var(--sub); font-size: 13px; }
+.col-act { width: 140px; }
+
+.role-tag {
+  padding: 2px 8px; border-radius: 10px; font-size: 12px;
+  background: #eee; color: #555;
+}
+.role-tag.admin { background: var(--point); color: #fff; }
+
+/* ---------- 마이페이지 프로필 카드 ---------- */
+.profile-card {
+  display: flex; align-items: center; gap: 16px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 20px;
+}
+.profile-info { flex: 1; }
+.profile-name { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.profile-sub { font-size: 13px; color: var(--sub); margin-top: 4px; }
+
+/* ---------- 게시글 보기 · 글쓰기 ---------- */
+.post { border-top: 2px solid #333; padding: 20px 8px; border-bottom: 1px solid var(--line); }
+.post-title { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+.post-meta { font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+.post-content { font-size: 15px; line-height: 1.7; white-space: pre-wrap; min-height: 120px; }
+.post-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+.write-form { display: flex; flex-direction: column; gap: 10px; }
+.write-form input, .write-form textarea {
+  width: 100%; padding: 11px 12px;
+  border: 1px solid var(--line); border-radius: 4px; outline: none;
+  font-family: inherit; font-size: 15px;
+}
+.write-form textarea { resize: vertical; line-height: 1.6; }
 
 /* ---------- 곡 목록(차트) ---------- */
 .track-list { border-top: 2px solid #333; }
@@ -81,6 +201,22 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid var(--line); background: #fff; font-size: 12px;
 }
 .play-btn.on { background: var(--point); color: #fff; border-color: var(--point); }
+
+/* 차트 탭 (TOP100 · 일간 · 주간) */
+.chart-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.chart-tab {
+  padding: 8px 18px; border: 1px solid var(--line); border-radius: 20px;
+  background: #fff; font-size: 14px; color: var(--sub);
+}
+.chart-tab.on { background: var(--point); border-color: var(--point); color: #fff; font-weight: 700; }
+
+/* 곡 오른쪽 버튼 묶음 (듣기·담기·다운) */
+.track-actions { display: flex; gap: 6px; flex: none; }
+.track-actions button {
+  padding: 6px 12px; border: 1px solid var(--line); border-radius: 4px;
+  background: #fff; font-size: 13px; color: #444;
+}
+.track-actions button:hover { border-color: var(--point); color: var(--point); }
 
 /* ---------- 앨범 그리드 ---------- */
 .album-grid {
