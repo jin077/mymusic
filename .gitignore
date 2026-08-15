@@ -19,6 +19,10 @@ frontend/dist/
 frontend/dist-ssr/
 *.local
 
+# ===== 업로드된 파일 (사용자 데이터라 저장소에 올리지 않음) =====
+backend/uploads/
+uploads/
+
 # ===== 로그 =====
 *.log
 logs/

@@ -11,6 +11,8 @@ export default defineConfig({
     //    (배포 때 nginx가 하는 일을, 개발 땐 vite 개발서버가 똑같이 해줌)
     proxy: {
       '/api': 'http://localhost:8080',
+      // 업로드된 프로필 사진도 백엔드가 서빙하므로 함께 넘긴다.
+      '/uploads': 'http://localhost:8080',
     },
   },
 })
