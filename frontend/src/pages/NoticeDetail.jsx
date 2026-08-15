@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getNotice, removeNotice } from '../storage'
+import CommentBox from '../components/CommentBox'
+import UserTag from '../components/UserTag'
 
 /**
  * 공지사항 글 하나 보기.
@@ -11,7 +14,20 @@ export default function NoticeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { role } = useAuth()
-  const notice = getNotice(id)
+
+  const [notice, setNotice] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getNotice(id)
+      .then(setNotice)
+      .catch(() => setNotice(null))   // 없는 글이면 서버가 404
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return <main className="page"><div className="empty">불러오는 중...</div></main>
+  }
 
   if (!notice) {
     return (
@@ -23,26 +39,37 @@ export default function NoticeDetail() {
     )
   }
 
-  const onDelete = () => {
+  const onDelete = async () => {
     if (!confirm('이 글을 삭제할까요?')) return
-    removeNotice(id)
-    navigate('/notice')
+    try {
+      await removeNotice(id)
+      navigate('/notice')
+    } catch {
+      alert('삭제에 실패했습니다.')
+    }
   }
 
   return (
     <main className="page">
       <div className="post">
         <h2 className="post-title">{notice.title}</h2>
-        <div className="post-meta">{notice.writer} · {notice.date}</div>
+        <div className="post-meta">
+          <UserTag username={notice.writer} /> · {notice.date}
+        </div>
         <div className="post-content">{notice.content}</div>
       </div>
 
       <div className="post-buttons">
         <Link className="auth-btn" to="/notice">목록</Link>
         {role === 'ADMIN' && (
-          <button className="auth-btn" onClick={onDelete}>삭제</button>
+          <>
+            <Link className="auth-btn" to={`/notice/${id}/edit`}>수정</Link>
+            <button className="auth-btn" onClick={onDelete}>삭제</button>
+          </>
         )}
       </div>
+
+      <CommentBox noticeId={notice.id} />
     </main>
   )
 }

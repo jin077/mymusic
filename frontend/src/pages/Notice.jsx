@@ -1,18 +1,35 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getNotices } from '../storage'
+import Pagination from '../components/Pagination'
 
 /**
  * 공지사항 게시판 — 글 목록.
  *
- * 글쓰기 버튼은 관리자(ADMIN)에게만 보인다.
- * (지금은 브라우저에 저장하므로 진짜 차단은 아니다.
- *  백엔드에 공지 API를 만들 때 서버에서 권한을 막아야 한다.)
+ * 조회는 로그인 없이도 된다(백엔드에서 GET만 permitAll).
+ * 글쓰기 버튼은 관리자에게만 보이며, 실제 차단도 백엔드가 한다.
+ *
+ * ⭐ 목록을 한 번에 다 받지 않고 쪽 단위로 받는다.
+ *   글이 많아져도 화면이 처음 뜨는 속도가 그대로다.
  */
+const PAGE_SIZE = 10
+
 export default function Notice() {
   const { role } = useAuth()
-  const [notices] = useState(() => getNotices())
+  const [data, setData] = useState(null)   // 서버가 준 쪽 정보 통째로
+  const [page, setPage] = useState(0)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    getNotices(page, PAGE_SIZE)
+      .then(setData)
+      .catch(() => setData(null))
+      .finally(() => setLoading(false))
+  }, [page])   // 쪽을 옮기면 다시 불러온다
+
+  const notices = data?.content ?? []
 
   return (
     <main className="page">
@@ -29,7 +46,9 @@ export default function Notice() {
           <span className="col-date">작성일</span>
         </div>
 
-        {notices.length === 0 ? (
+        {loading ? (
+          <div className="empty">불러오는 중...</div>
+        ) : notices.length === 0 ? (
           <div className="empty">등록된 공지가 없습니다.</div>
         ) : (
           notices.map((n) => (
@@ -42,6 +61,16 @@ export default function Notice() {
           ))
         )}
       </div>
+
+      {data && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          first={data.first}
+          last={data.last}
+          onChange={setPage}
+        />
+      )}
     </main>
   )
 }

@@ -35,7 +35,9 @@ export default function Search() {
       <p className="page-desc">
         {keyword ? `"${keyword}" 검색 결과 ${tracks.length}건` : '검색어를 입력해 주세요'}
       </p>
-      {loading ? <div className="empty">검색 중...</div> : <TrackList tracks={tracks} showRank={false} />}
+      {loading
+        ? <div className="empty">검색 중...</div>
+        : <TrackList tracks={tracks} showRank={false} actions />}
     </main>
   )
 }

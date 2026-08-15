@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import Avatar from './Avatar'
 
 /**
  * 사이트 상단 헤더 (2단 구조).
@@ -19,7 +20,7 @@ export default function Header() {
   const [keyword, setKeyword] = useState('')
   const navigate = useNavigate()
   const { pathname } = useLocation()   // 지금 보고 있는 주소
-  const { isLoggedIn, username, role, logout } = useAuth()
+  const { isLoggedIn, username, role, logout, displayName, profileImage } = useAuth()
 
   const isHome = pathname === '/'
 
@@ -53,8 +54,8 @@ export default function Header() {
         {isLoggedIn ? (
           /* ── 마이메뉴 ── */
           <div className="my-menu">
-            <span className="avatar">{username?.[0]?.toUpperCase() ?? '?'}</span>
-            <span className="my-name">{username}</span>
+            <Avatar src={profileImage} name={username} />
+            <span className="my-name">{displayName}</span>
             <NavLink to="/mypage" className="my-link">마이페이지</NavLink>
             {role === 'ADMIN' && <NavLink to="/admin" className="my-link">관리자</NavLink>}
             <button className="my-link" onClick={onLogout}>로그아웃</button>

@@ -20,6 +20,8 @@ import { useAuth } from '../auth/AuthContext'
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [nickname, setNickname] = useState('')
+  const [email, setEmail] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
   const { pathname, state } = useLocation()
@@ -46,10 +48,13 @@ export default function Login() {
     e.preventDefault()
     try {
       // role은 보내지 않는다 → 백엔드(MemberService)가 USER로 강제 고정
-      await api.post('/signup', { username, password })
+      await api.post('/signup', { username, password, nickname, email })
       navigate('/login', { state: { joined: true } })
-    } catch {
-      setMessage('회원가입 실패: 이미 있는 아이디이거나 입력을 확인하세요')
+    } catch (err) {
+      // 409 = 이미 있는 아이디(충돌). 그 외는 입력값 문제로 안내한다.
+      setMessage(err.response?.status === 409
+        ? '이미 사용 중인 아이디입니다'
+        : '회원가입 실패: 입력을 확인하세요')
     }
   }
 
@@ -69,6 +74,22 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {/* 회원가입일 때만 추가 정보를 받는다 (둘 다 선택 입력) */}
+          {!isLogin && (
+            <>
+              <input
+                placeholder="닉네임 (선택)"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+              />
+              <input
+                placeholder="이메일 (선택)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </>
+          )}
+
           <button type="submit">{isLogin ? '로그인' : '회원가입'}</button>
         </form>
 

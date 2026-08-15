@@ -23,13 +23,10 @@ export default function PlayerBar() {
     seek((e.clientX - box.left) / box.width)
   }
 
-  if (!current) {
-    return (
-      <div className="player">
-        <span className="player-empty">재생할 곡을 선택해 주세요</span>
-      </div>
-    )
-  }
+  // 곡을 고르기 전에는 재생바를 아예 그리지 않는다.
+  //   null을 리턴하면 화면에 아무것도 남지 않는다(React에서 "안 그림"을 뜻함).
+  //   한 번 재생한 뒤에는 Provider가 current를 계속 들고 있으므로 페이지를 옮겨도 유지된다.
+  if (!current) return null
 
   const ratio = duration ? (time / duration) * 100 : 0
 

@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import api from '../api'
 
 /**
  * ===== 로그인 상태를 앱 전체에서 공유 =====
@@ -27,6 +28,36 @@ function readPayload(token) {
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token'))
+  const [profile, setProfile] = useState(null)   // 서버에서 받아온 내 정보
+
+  /**
+   * 내 정보를 서버에서 받아온다 (로그인 직후, 정보·사진 수정 후).
+   *
+   * ⭐ 토큰에서 꺼내는 것 vs 서버에서 가져오는 것
+   *   토큰에는 아이디(sub)와 권한(role)만 들어 있다.
+   *   닉네임·프로필 사진처럼 자주 바뀌는 정보는 토큰에 넣지 않는다.
+   *   넣어두면 값을 고쳐도 다시 로그인하기 전까지 옛 값이 화면에 남는다.
+   *
+   * useCallback : 이 함수를 매 렌더마다 새로 만들지 않게 붙잡아 둔다.
+   *   아래 useEffect의 의존성에 들어가므로, 새로 만들어지면 무한 반복이 된다.
+   */
+  const refreshProfile = useCallback(async () => {
+    if (!localStorage.getItem('token')) {
+      setProfile(null)
+      return
+    }
+    try {
+      const res = await api.get('/members/me')
+      setProfile(res.data)
+    } catch {
+      setProfile(null)   // 토큰이 만료됐을 수 있다
+    }
+  }, [])
+
+  // 토큰이 생기거나 바뀌면 내 정보를 받아온다
+  useEffect(() => {
+    refreshProfile()
+  }, [token, refreshProfile])
 
   const login = (newToken) => {
     localStorage.setItem('token', newToken)
@@ -36,6 +67,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem('token')
     setToken(null)
+    setProfile(null)
   }
 
   const payload = token ? readPayload(token) : null
@@ -47,6 +79,11 @@ export function AuthProvider({ children }) {
     isLoggedIn: !!token,
     username: payload?.sub ?? null,
     role: payload?.role ?? null,
+    profile,                    // { id, username, role, nickname, email, profileImage }
+    refreshProfile,
+    // 화면에 보여줄 이름 : 닉네임이 있으면 닉네임, 없으면 아이디
+    displayName: profile?.nickname || payload?.sub || null,
+    profileImage: profile?.profileImage ?? null,
   }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

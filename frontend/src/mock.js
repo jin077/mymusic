@@ -24,7 +24,17 @@ export const MOCK_TRACKS = [
   { id: 't10', title: '열 번째 곡', artist: '가수 D', album: '앨범 넷', albumImage: null, previewUrl: null },
 ]
 
-/** 앨범 목록: 곡 목록에서 앨범 기준으로 중복을 제거해 만든다 */
-export const MOCK_ALBUMS = [...new Map(
-  MOCK_TRACKS.map((t) => [t.album, { album: t.album, artist: t.artist, albumImage: t.albumImage }])
-).values()]
+/**
+ * 앨범 목록.
+ *   { id, rank, album, artist, albumImage, releaseDate }
+ *   - rank        : 인기 순위 (값으로 들고 다녀야 정렬해도 순위가 안 깨진다)
+ *   - releaseDate : 발매일 (최신 앨범 정렬에 쓴다)
+ */
+export const MOCK_ALBUMS = [
+  { id: 'a1', rank: 1, album: '앨범 하나', artist: '가수 A', albumImage: null, releaseDate: '2026-08-14' },
+  { id: 'a2', rank: 2, album: '앨범 둘', artist: '가수 B', albumImage: null, releaseDate: '2026-07-30' },
+  { id: 'a3', rank: 3, album: '앨범 셋', artist: '가수 C', albumImage: null, releaseDate: '2026-08-09' },
+  { id: 'a4', rank: 4, album: '앨범 넷', artist: '가수 D', albumImage: null, releaseDate: '2026-06-21' },
+  { id: 'a5', rank: 5, album: '앨범 다섯', artist: '가수 E', albumImage: null, releaseDate: '2026-08-02' },
+  { id: 'a6', rank: 6, album: '앨범 여섯', artist: '가수 F', albumImage: null, releaseDate: '2026-05-15' },
+]

@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { recordPlay } from '../storage'
 
 /**
  * ===== 전역 음악 플레이어 =====
@@ -23,6 +25,10 @@ export function PlayerProvider({ children }) {
   //    Audio 객체를 여기 넣어 "앱 전체에서 딱 하나"만 쓰도록 한다.
   const audioRef = useRef(null)
   if (audioRef.current === null) audioRef.current = new Audio()
+
+  // 재생 기록은 로그인한 사람만 남긴다(누구 것인지 알아야 하므로).
+  //   main.jsx에서 PlayerProvider가 AuthProvider '안쪽'에 있어서 여기서 useAuth를 쓸 수 있다.
+  const { isLoggedIn } = useAuth()
 
   const [current, setCurrent] = useState(null) // 현재 선택된 곡
   const [playing, setPlaying] = useState(false) // 재생 중인지
@@ -84,7 +90,13 @@ export function PlayerProvider({ children }) {
     audioRef.current.src = track.previewUrl
     audioRef.current
       .play()
-      .then(() => setPlaying(true))
+      .then(() => {
+        setPlaying(true)
+        // 재생이 실제로 시작된 뒤에만 기록한다.
+        //   누르자마자 기록하면 자동재생 차단으로 소리가 안 났는데도 기록이 남는다.
+        //   응답을 기다리지 않는다(await 없음) — 기록 때문에 재생이 느려지면 안 되므로.
+        if (isLoggedIn) recordPlay(track)
+      })
       .catch(() => {
         setPlaying(false)
         setNotice('재생할 수 없습니다')

@@ -17,9 +17,10 @@ body {
   font-family: 'Malgun Gothic', system-ui, sans-serif;
   color: var(--text);
   background: #fff;
-  /* 하단 고정 플레이어에 콘텐츠가 가리지 않도록 여백 확보 */
-  padding-bottom: var(--player-h);
 }
+
+/* 재생바가 떠 있을 때만 그 높이만큼 아래 여백을 준다 (Layout이 클래스를 붙인다) */
+.with-player { padding-bottom: var(--player-h); }
 
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
@@ -80,7 +81,22 @@ button { font-family: inherit; cursor: pointer; }
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700; flex: none;
 }
-.avatar.big { width: 56px; height: 56px; font-size: 24px; }
+.avatar.big { width: 64px; height: 64px; font-size: 28px; }
+.avatar.xl { width: 110px; height: 110px; font-size: 44px; }
+/* 사진일 때: 동그랗게 잘라서 꽉 채운다 */
+img.avatar { object-fit: cover; background: #eee; }
+
+/* 마이페이지: 동그라미 위에 올리면 '변경'이 뜬다 */
+.avatar-picker { position: relative; cursor: pointer; flex: none; line-height: 0; }
+.avatar-edit {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55); color: #fff;
+  font-size: 10px; text-align: center; padding: 3px 0;
+  border-radius: 0 0 28px 28px;
+  opacity: 0; transition: opacity 0.15s;
+}
+.avatar-picker:hover .avatar-edit { opacity: 1; }
+.avatar-picker:hover .avatar { filter: brightness(0.92); }
 
 /* ---------- 본문 공통 ---------- */
 .page { max-width: 1080px; margin: 0 auto; padding: 28px 20px 40px; }
@@ -107,6 +123,47 @@ button { font-family: inherit; cursor: pointer; }
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .sub-link { display: inline-block; margin-top: 10px; font-size: 13px; }
+
+/* 로그인 후 오른쪽 내 정보 박스
+   ┌──────────────────────────────┐
+   │ (사진)  아이디      로그아웃 │
+   │         이용권    구매하기   │
+   ├──────────────────────────────┤
+   │  쪽지 0 · 마이페이지 · 이벤트│
+   └──────────────────────────────┘ */
+.member-box { padding: 0; overflow: hidden; }
+
+.member-top {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 16px; border-bottom: 1px solid var(--line);
+}
+.member-photo { flex: none; line-height: 0; }
+.member-info { flex: 1; min-width: 0; }
+
+.member-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.member-line.sub { margin-top: 8px; font-size: 13px; color: var(--sub); }
+
+.member-name { font-size: 16px; font-weight: 700; }
+.member-name:hover { color: var(--point); }
+.member-logout { font-size: 12px; color: var(--sub); font-weight: 400; }
+.member-logout:hover { color: var(--point); }
+
+.side-value { color: var(--text); font-weight: 600; }
+.side-value.link { color: var(--point); }
+/* 값이 없을 때 — 눌러서 구매로 갈 수 있지만 튀지 않게 */
+.side-value.none { color: var(--sub); font-weight: 400; }
+.side-value.none:hover { color: var(--point); }
+.none-link { color: var(--sub); }
+.none-link:hover { color: var(--point); text-decoration: underline; }
+
+.member-links {
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 12px 8px; font-size: 13px;
+}
+.member-links > * { color: var(--sub); }
+.member-links > *:hover { color: var(--point); }
 .side-btn {
   display: block; width: 100%; padding: 10px;
   border: 0; border-radius: 4px;
@@ -159,14 +216,247 @@ button { font-family: inherit; cursor: pointer; }
 }
 .role-tag.admin { background: var(--point); color: #fff; }
 
+/* ---------- 마이페이지: 왼쪽 접힌 메뉴 + 오른쪽 내용 ---------- */
+.mypage { display: flex; gap: 20px; align-items: flex-start; }
+
+.mypage-side { width: 200px; flex: none; }
+.mypage-side-inner {
+  position: sticky; top: 90px;
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+}
+
+.side-menu { display: flex; flex-direction: column; padding: 8px 0; }
+
+.side-menu-item {
+  display: block; width: 100%;
+  padding: 9px 16px; border: 0; background: none;
+  text-align: left; white-space: nowrap;
+  font-size: 14px; color: #444;
+}
+.side-menu-item:hover { background: #f5f5f5; color: var(--point); }
+.side-menu-item.on { color: var(--point); font-weight: 700; }
+
+.side-menu-title {
+  padding: 14px 16px 6px;
+  font-size: 16px; font-weight: 800; white-space: nowrap;
+  border-top: 1px solid var(--line); margin-top: 6px;
+}
+
+.mypage-main { flex: 1; min-width: 0; }
+.mypage-main .page-title { margin-bottom: 16px; }
+
+/* 화면이 좁으면 목차를 위로 올린다 */
+@media (max-width: 900px) {
+  .mypage { flex-direction: column; }
+  .mypage-side { width: 100%; }
+  .mypage-side-inner { position: static; }
+}
+
 /* ---------- 마이페이지 프로필 카드 ---------- */
 .profile-card {
-  display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: flex-start; gap: 24px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 24px;
+}
+
+/* 왼쪽 : 사진 + 변경/삭제 */
+.profile-photo { flex: none; text-align: center; }
+.photo-buttons { margin-top: 10px; font-size: 12px; color: var(--sub); }
+.photo-buttons .link-btn { font-size: 12px; color: var(--sub); font-weight: 400; }
+.photo-buttons .link-btn:hover { color: var(--point); }
+.photo-sep { margin: 0 6px; color: var(--line); }
+
+/* 오른쪽 : 인사말 + 정보 */
+.profile-info { flex: 1; min-width: 0; }
+.profile-name {
+  font-size: 20px; font-weight: 700; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.profile-sub { font-size: 14px; color: var(--sub); margin-top: 6px; }
+.profile-sub b { color: #d33; font-weight: 600; }
+.profile-sub b.ok { color: var(--point); }
+
+.profile-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 13px; color: var(--sub);
+}
+.link-btn.withdraw { font-size: 13px; color: var(--sub); font-weight: 400; }
+.link-btn.withdraw:hover { color: #d33; text-decoration: underline; }
+/* 정보 수정 모드일 때 프로필 칸이 입력 폼으로 바뀐다 */
+.profile-info input {
+  width: 100%; padding: 8px 10px; margin-bottom: 8px;
+  border: 1px solid var(--line); border-radius: 4px; outline: none; font-size: 14px;
+}
+.profile-info .post-buttons { margin-top: 0; }
+
+/* ---------- 회원수정 (기본정보 · 비밀번호) ---------- */
+.edit-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;
+}
+.edit-card {
+  display: flex; flex-direction: column;
   border: 1px solid var(--line); border-radius: 8px; padding: 20px;
 }
-.profile-info { flex: 1; }
-.profile-name { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.profile-sub { font-size: 13px; color: var(--sub); margin-top: 4px; }
+.edit-title { font-size: 15px; font-weight: 700; margin: 0 0 16px; }
+.edit-label { font-size: 12px; color: var(--sub); margin-bottom: 5px; }
+.edit-card input {
+  padding: 10px 12px; margin-bottom: 14px;
+  border: 1px solid var(--line); border-radius: 4px;
+  outline: none; font-size: 14px; font-family: inherit;
+}
+.edit-card input:disabled { background: #f5f5f5; color: var(--sub); }
+.edit-hint { margin: -10px 0 14px; font-size: 12px; color: var(--sub); }
+.edit-card button { align-self: flex-start; margin-top: auto; }
+
+/* ---------- 페이징 ---------- */
+.pagination { display: flex; justify-content: center; gap: 6px; margin-top: 24px; }
+.page-btn {
+  min-width: 34px; padding: 7px 10px;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: #fff; font-size: 13px; color: #555;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--point); color: var(--point); }
+.page-btn.on { background: var(--point); border-color: var(--point); color: #fff; font-weight: 700; }
+.page-btn:disabled { color: #ccc; cursor: default; }
+
+/* ---------- 앨범 상세 ---------- */
+.album-header { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 8px; }
+.album-header-cover {
+  width: 180px; height: 180px; flex: none;
+  border-radius: 8px; background: #ddd; object-fit: cover;
+}
+.album-card { display: block; }
+.album-card:hover .album-name { color: var(--point); }
+
+/* ---------- 아이디 태그 (마우스 올리면 쪽지 버튼) ---------- */
+.user-tag { position: relative; display: inline-block; }
+.user-name { font-weight: 700; cursor: default; }
+.user-tag:hover .user-name { color: var(--point); }
+
+/* 평소엔 숨어 있다가 아이디에 마우스를 올리면 아래에 뜬다 */
+.user-menu {
+  position: absolute; left: 0; top: 100%;
+  display: none; z-index: 30;
+  padding-top: 4px;   /* 아이디와 버튼 사이 틈 — 마우스가 지나갈 때 끊기지 않게 */
+}
+.user-tag:hover .user-menu { display: block; }
+.user-menu button {
+  padding: 5px 12px; white-space: nowrap;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: #fff; font-size: 12px; color: #444;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.user-menu button:hover { border-color: var(--point); color: var(--point); }
+
+/* ---------- 창(모달) ---------- */
+.modal-back {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  width: 100%; max-width: 400px;
+  background: #fff; border-radius: 10px; padding: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+.modal-title { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.modal input, .modal textarea {
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px;
+  outline: none; font-size: 14px; font-family: inherit; resize: vertical;
+}
+.modal .post-buttons { margin-top: 4px; }
+
+/* ---------- 쪽지함 ---------- */
+.msg-row { cursor: pointer; }
+.msg-row.unread .col-title { font-weight: 700; }
+.msg-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--point); margin-right: 7px; vertical-align: middle;
+}
+.msg-body {
+  padding: 16px 18px; background: #fafafa;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px; line-height: 1.7; white-space: pre-wrap;
+}
+.msg-body .post-buttons { margin-top: 12px; }
+
+.sub-section-title {
+  font-size: 14px; font-weight: 700; color: #555;
+  margin: 20px 0 8px;
+}
+
+/* ---------- 캐시 · 구매내역 ---------- */
+.cash-box {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; margin-bottom: 14px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fafafa;
+  font-size: 14px;
+}
+.cash-box b { font-size: 18px; color: var(--point); }
+.cash-note { margin-left: auto; font-size: 12px; color: var(--sub); }
+.charge-link { margin-left: 8px; font-size: 12px; color: var(--point); }
+.charge-link:hover { text-decoration: underline; }
+
+.purchase-meta { flex: none; text-align: right; margin-right: 10px; }
+.purchase-price { font-size: 13px; font-weight: 700; }
+.purchase-date { font-size: 11px; color: var(--sub); }
+
+/* ---------- 즐겨찾기 폴더 ---------- */
+.folder-tabs {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.folder-tab {
+  padding: 6px 14px; border: 1px solid var(--line); border-radius: 16px;
+  background: #fff; font-size: 13px; color: var(--sub);
+}
+.folder-tab.on { background: var(--point); border-color: var(--point); color: #fff; font-weight: 700; }
+
+/* 폴더 이름 옆의 수정·삭제 버튼 */
+.folder-chip { display: inline-flex; align-items: center; gap: 2px; }
+.folder-edit {
+  border: 0; background: none; padding: 2px 4px;
+  font-size: 12px; color: #bbb;
+}
+.folder-edit:hover { color: var(--point); }
+
+.folder-add {
+  padding: 6px 12px; border: 1px dashed var(--line); border-radius: 16px;
+  background: #fff; font-size: 13px; color: var(--sub);
+}
+.folder-add:hover { border-color: var(--point); color: var(--point); }
+
+/* 곡마다 붙는 폴더 선택 칸 */
+.folder-select {
+  flex: none; margin-right: 10px;
+  padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px;
+  background: #fff; font-size: 12px; color: #555; font-family: inherit;
+  max-width: 120px;
+}
+
+/* ---------- 댓글 ---------- */
+.comment-box { margin-top: 32px; }
+.comment-list { border-top: 1px solid var(--line); }
+.comment-row { padding: 14px 4px; border-bottom: 1px solid var(--line); }
+.comment-head {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; margin-bottom: 6px;
+}
+.comment-date { color: var(--sub); font-size: 12px; }
+.comment-del { margin-left: auto; font-size: 12px; color: var(--sub); font-weight: 400; }
+.comment-del:hover { color: #d33; }
+.comment-notice { font-weight: 700; }
+.comment-notice:hover { color: var(--point); }
+.comment-content { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+
+.comment-form { display: flex; gap: 8px; margin-top: 16px; align-items: flex-end; }
+.comment-form textarea {
+  flex: 1; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 4px; outline: none;
+  font-family: inherit; font-size: 14px; resize: vertical;
+}
 
 /* ---------- 게시글 보기 · 글쓰기 ---------- */
 .post { border-top: 2px solid #333; padding: 20px 8px; border-bottom: 1px solid var(--line); }
@@ -210,6 +500,22 @@ button { font-family: inherit; cursor: pointer; }
 }
 .chart-tab.on { background: var(--point); border-color: var(--point); color: #fff; font-weight: 700; }
 
+/* 차트 안내 문구 */
+.chart-note {
+  padding: 10px 14px; margin-bottom: 12px;
+  background: #fafafa; border: 1px solid var(--line); border-radius: 6px;
+  font-size: 12px; color: var(--sub);
+}
+/* 목록 오른쪽 부가 정보 (주간 차트의 평균 순위 등) */
+.track-extra { flex: none; margin-right: 10px; font-size: 12px; color: var(--sub); }
+
+/* 활동내역: 재생 횟수 배지 */
+.play-count {
+  flex: none; margin-right: 10px;
+  font-size: 12px; font-weight: 700; color: var(--point);
+  background: #eafaf1; border-radius: 10px; padding: 3px 9px;
+}
+
 /* 곡 오른쪽 버튼 묶음 (듣기·담기·다운) */
 .track-actions { display: flex; gap: 6px; flex: none; }
 .track-actions button {
@@ -222,9 +528,20 @@ button { font-family: inherit; cursor: pointer; }
 .album-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px;
 }
-.album-cover { width: 100%; aspect-ratio: 1/1; background: #ddd; border-radius: 6px; }
+.album-cover { width: 100%; aspect-ratio: 1/1; background: #ddd; border-radius: 6px; display: block; }
 .album-name { margin-top: 8px; font-size: 14px; font-weight: 600; }
 .album-artist { font-size: 13px; color: var(--sub); }
+.album-date { font-size: 12px; color: var(--sub); margin-top: 2px; }
+
+/* 커버 위에 순위 배지를 얹는다 */
+.album-cover-box { position: relative; }
+.album-rank {
+  position: absolute; left: 8px; top: 8px;
+  min-width: 24px; height: 24px; padding: 0 6px;
+  border-radius: 12px; background: rgba(0, 0, 0, 0.65); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
 
 /* ---------- 이용권 카드 ---------- */
 .ticket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }

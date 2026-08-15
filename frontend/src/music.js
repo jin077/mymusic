@@ -36,16 +36,53 @@ export async function searchTracks(keyword) {
   return res.data
 }
 
-/** 차트(인기곡) 목록 */
+/** 실시간 차트 (외부 API를 그대로) */
 export async function getChart() {
   if (!USE_BACKEND) return MOCK_TRACKS
   const res = await api.get('/music/chart')
   return res.data
 }
 
-/** 앨범 목록 */
+/**
+ * 일간 차트 — 서버가 매일 저장해 둔 그날의 기록.
+ * 실시간 차트와 달리 "하루 동안 고정"이라 순위가 흔들리지 않는다.
+ */
+export async function getDailyChart() {
+  if (!USE_BACKEND) return MOCK_TRACKS
+  const res = await api.get('/music/chart/daily')
+  return res.data
+}
+
+/**
+ * 주간 차트 — 최근 7일 기록을 곡별 평균 순위로 정렬한 것.
+ * 각 곡에 avgRank(평균 순위)와 days(차트에 오른 날 수)가 함께 온다.
+ */
+export async function getWeeklyChart() {
+  if (!USE_BACKEND) return MOCK_TRACKS
+  const res = await api.get('/music/chart/weekly')
+  return res.data
+}
+
+/** 인기 앨범 (Apple 앨범 차트 순위 순) */
 export async function getAlbums() {
   if (!USE_BACKEND) return MOCK_ALBUMS
   const res = await api.get('/music/albums')
+  return res.data
+}
+
+/** 앨범 수록곡 */
+export async function getAlbumTracks(albumId) {
+  if (!USE_BACKEND) return MOCK_TRACKS
+  const res = await api.get(`/music/albums/${albumId}/tracks`)
+  return res.data
+}
+
+/** 최신 앨범 (같은 목록을 발매일 순으로 정렬한 것) */
+export async function getNewAlbums() {
+  if (!USE_BACKEND) {
+    // mock일 때도 백엔드와 같은 규칙으로 정렬해 화면이 똑같이 동작하게 한다
+    return [...MOCK_ALBUMS].sort((a, b) => (b.releaseDate ?? '').localeCompare(a.releaseDate ?? ''))
+  }
+  const res = await api.get('/music/albums/new')
   return res.data
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api'
 import { useAuth } from '../auth/AuthContext'
+import MessageModal from '../components/MessageModal'
 
 /**
  * 관리자 페이지 — 전체 회원 목록 조회 / 삭제.
@@ -16,6 +17,7 @@ export default function Admin() {
   const { isLoggedIn, role } = useAuth()
   const [members, setMembers] = useState([])
   const [message, setMessage] = useState('')
+  const [msgTo, setMsgTo] = useState(null)   // 쪽지 보낼 상대 아이디
 
   useEffect(() => {
     if (isLoggedIn) load()
@@ -41,8 +43,20 @@ export default function Admin() {
     try {
       await api.delete(`/admin/members/${m.id}`)
       setMembers((list) => list.filter((x) => x.id !== m.id))
+    } catch (err) {
+      setMessage(err.response?.status === 404 ? '이미 삭제된 회원입니다(404)' : '삭제 실패')
+    }
+  }
+
+  /** 권한 변경 — USER ↔ ADMIN 전환 */
+  const onChangeRole = async (m) => {
+    const next = m.role === 'ADMIN' ? 'USER' : 'ADMIN'
+    if (!confirm(`${m.username}의 권한을 ${next}로 바꿀까요?`)) return
+    try {
+      const res = await api.put(`/admin/members/${m.id}`, { role: next })
+      setMembers((list) => list.map((x) => (x.id === m.id ? res.data : x)))
     } catch {
-      setMessage('삭제 실패')
+      setMessage('권한 변경 실패')
     }
   }
 
@@ -68,6 +82,7 @@ export default function Admin() {
         <div className="table-head">
           <span className="col-id">번호</span>
           <span className="col-name">아이디</span>
+          <span className="col-name">닉네임</span>
           <span className="col-role">권한</span>
           <span className="col-act">관리</span>
         </div>
@@ -79,13 +94,15 @@ export default function Admin() {
             <div className="table-row" key={m.id}>
               <span className="col-id">{m.id}</span>
               <span className="col-name"><b>{m.username}</b></span>
+              <span className="col-name">{m.nickname || '-'}</span>
               <span className="col-role">
                 <span className={`role-tag${m.role === 'ADMIN' ? ' admin' : ''}`}>{m.role}</span>
               </span>
               <span className="col-act">
                 <div className="track-actions">
-                  <button onClick={() => alert('회원 수정 API는 아직 없습니다. (내일 백엔드 작업)')}>
-                    수정
+                  <button onClick={() => setMsgTo(m.username)}>쪽지</button>
+                  <button onClick={() => onChangeRole(m)}>
+                    {m.role === 'ADMIN' ? 'USER로' : 'ADMIN으로'}
                   </button>
                   <button onClick={() => onDelete(m)}>삭제</button>
                 </div>
@@ -94,6 +111,9 @@ export default function Admin() {
           ))
         )}
       </div>
+
+      {/* 쪽지 쓰기 창 — 공지·댓글에서 쓰는 것과 같은 컴포넌트 */}
+      {msgTo && <MessageModal to={msgTo} onClose={() => setMsgTo(null)} />}
 
       {message && <p className="msg">{message}</p>}
     </main>

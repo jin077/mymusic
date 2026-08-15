@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getChart, getAlbums } from '../music'
+import { getChart, getAlbums, getNewAlbums } from '../music'
+import { getUnreadCount } from '../storage'
 import { useAuth } from '../auth/AuthContext'
 import TrackList from '../components/TrackList'
+import Avatar from '../components/Avatar'
 
 /** 장르 박스 — 아직 장르 API가 없어 검색어로 연결해 둔다 */
 const GENRES = [
@@ -15,13 +17,23 @@ const GENRES = [
 
 export default function Home() {
   const [tracks, setTracks] = useState([])
-  const [albums, setAlbums] = useState([])
-  const { isLoggedIn, username, logout } = useAuth()
+  const [albums, setAlbums] = useState([])        // 인기 앨범
+  const [newAlbums, setNewAlbums] = useState([])  // 최신 앨범
+  const { isLoggedIn, username, logout, displayName, profileImage, profile } = useAuth()
+
+  // 이용권은 내 정보(profile)에 함께 온다. 쪽지 수만 따로 조회한다.
+  const [messageCount, setMessageCount] = useState(0)
+
+  useEffect(() => {
+    if (!isLoggedIn) { setMessageCount(0); return }
+    getUnreadCount().then(setMessageCount).catch(() => setMessageCount(0))
+  }, [isLoggedIn])
 
   // 화면이 처음 그려질 때 데이터를 불러온다
   useEffect(() => {
     getChart().then((list) => setTracks(list.slice(0, 10)))
-    getAlbums().then((list) => setAlbums(list))
+    getAlbums().then(setAlbums)
+    getNewAlbums().then(setNewAlbums)
   }, [])
 
   return (
@@ -33,8 +45,8 @@ export default function Home() {
           <Link to="/albums" className="more">전체보기 &gt;</Link>
         </div>
         <div className="album-grid">
-          {albums.slice(0, 5).map((a) => (
-            <AlbumCard key={a.album} album={a} />
+          {newAlbums.slice(0, 5).map((a) => (
+            <AlbumCard key={a.id} album={a} showDate />
           ))}
         </div>
 
@@ -44,7 +56,7 @@ export default function Home() {
         </div>
         <div className="album-grid">
           {albums.slice(0, 5).map((a) => (
-            <AlbumCard key={a.album} album={a} />
+            <AlbumCard key={a.id} album={a} showRank />
           ))}
         </div>
 
@@ -62,24 +74,46 @@ export default function Home() {
 
       {/* ── 오른쪽: 로그인과 차트 ── */}
       <aside className="home-side">
-        <div className="side-box login-box">
-          {isLoggedIn ? (
-            <>
-              <div className="login-hello">
-                <span className="avatar">{username?.[0]?.toUpperCase()}</span>
-                <b>{username}</b> 님
+        {isLoggedIn ? (
+          /* ── 로그인 후: 내 정보 요약 ── */
+          <div className="side-box member-box">
+            <div className="member-top">
+              {/* 사진을 누르면 마이페이지로 */}
+              <Link to="/mypage" className="member-photo">
+                <Avatar src={profileImage} name={username} size="big" />
+              </Link>
+
+              <div className="member-info">
+                <div className="member-line">
+                  <Link to="/mypage" className="member-name">{displayName}</Link>
+                  <button className="link-btn member-logout" onClick={logout}>로그아웃</button>
+                </div>
+
+                {/* 이용권은 아직 백엔드에 구독 정보가 없다.
+                    구독 API가 생기면 이 줄만 실제 남은 일수로 바뀐다. */}
+                <div className="member-line sub">
+                  <span>이용권</span>
+                  {profile?.ticketDaysLeft != null
+                    ? <span className="side-value">{profile.ticketDaysLeft}일 남음</span>
+                    : <Link to="/ticket" className="side-value none">없음</Link>}
+                </div>
               </div>
-              <Link className="side-btn" to="/mypage">마이페이지</Link>
-              <button className="link-btn sub-link" onClick={logout}>로그아웃</button>
-            </>
-          ) : (
-            <>
-              <div className="login-hello">로그인하고 이용해 보세요</div>
-              <Link className="side-btn" to="/login">로그인</Link>
-              <Link className="link-btn sub-link" to="/signup">회원가입</Link>
-            </>
-          )}
-        </div>
+            </div>
+
+            <div className="member-links">
+              <Link to="/mypage">쪽지 {messageCount}</Link>{/* 안 읽은 개수 */}
+              <Link to="/mypage">마이페이지</Link>
+              <Link to="/event">이벤트</Link>
+            </div>
+          </div>
+        ) : (
+          /* ── 로그인 전 ── */
+          <div className="side-box login-box">
+            <div className="login-hello">로그인하고 이용해 보세요</div>
+            <Link className="side-btn" to="/login">로그인</Link>
+            <Link className="link-btn sub-link" to="/signup">회원가입</Link>
+          </div>
+        )}
 
         <div className="side-box">
           <div className="section-title small">
@@ -93,15 +127,26 @@ export default function Home() {
   )
 }
 
-/** 앨범 카드 한 장 (최신·인기에서 같이 쓴다) */
-function AlbumCard({ album }) {
+/**
+ * 앨범 카드 한 장 (최신·인기에서 같이 쓴다)
+ *
+ * 같은 카드지만 최신 앨범에는 발매일을, 인기 앨범에는 순위를 보여준다.
+ * → 차이를 props로 받는다 (TrackList의 showRank·actions와 같은 방식)
+ */
+function AlbumCard({ album, showRank = false, showDate = false }) {
   return (
-    <div>
-      {album.albumImage
-        ? <img className="album-cover" src={album.albumImage} alt="" />
-        : <div className="album-cover" />}
+    <Link className="album-card" to={`/album/${album.id}`} state={album}>
+      <div className="album-cover-box">
+        {album.albumImage
+          ? <img className="album-cover" src={album.albumImage} alt="" />
+          : <div className="album-cover" />}
+        {showRank && <span className="album-rank">{album.rank}</span>}
+      </div>
       <div className="album-name">{album.album}</div>
       <div className="album-artist">{album.artist}</div>
-    </div>
+      {showDate && album.releaseDate && (
+        <div className="album-date">{album.releaseDate}</div>
+      )}
+    </Link>
   )
 }

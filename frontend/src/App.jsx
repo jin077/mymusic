@@ -11,6 +11,8 @@ import Admin from './pages/Admin'
 import Notice from './pages/Notice'
 import NoticeDetail from './pages/NoticeDetail'
 import NoticeWrite from './pages/NoticeWrite'
+import Event from './pages/Event'
+import AlbumDetail from './pages/AlbumDetail'
 
 /**
  * ===== 주소(URL)와 페이지를 연결하는 표 =====
@@ -41,6 +43,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/chart" element={<Chart />} />
         <Route path="/albums" element={<Albums />} />
+        <Route path="/album/:id" element={<AlbumDetail />} />
         <Route path="/ticket" element={<Ticket />} />
         <Route path="/search" element={<Search />} />
 
@@ -55,6 +58,9 @@ export default function App() {
         <Route path="/notice" element={<Notice />} />
         <Route path="/notice/write" element={<NoticeWrite />} />
         <Route path="/notice/:id" element={<NoticeDetail />} />
+        <Route path="/notice/:id/edit" element={<NoticeWrite />} />
+
+        <Route path="/event" element={<Event />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
