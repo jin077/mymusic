@@ -89,8 +89,6 @@ export default function Home() {
                   <button className="link-btn member-logout" onClick={logout}>로그아웃</button>
                 </div>
 
-                {/* 이용권은 아직 백엔드에 구독 정보가 없다.
-                    구독 API가 생기면 이 줄만 실제 남은 일수로 바뀐다. */}
                 <div className="member-line sub">
                   <span>이용권</span>
                   {profile?.ticketDaysLeft != null

@@ -64,13 +64,13 @@ export default function Login() {
         <h2 className="page-title">{isLogin ? '로그인' : '회원가입'}</h2>
         <form onSubmit={isLogin ? handleLogin : handleSignup}>
           <input
-            placeholder={isLogin ? '아이디' : '사용할 아이디'}
+            placeholder={isLogin ? '아이디' : '새 아이디'}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="password"
-            placeholder={isLogin ? '비밀번호' : '사용할 비밀번호'}
+            placeholder={isLogin ? '비밀번호' : '새 비밀번호'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
