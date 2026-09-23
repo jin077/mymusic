@@ -6,15 +6,18 @@
 application-secret.properties
 
 # 빌드 캐시·중간 산출물 (수백 MB)
+# ⭐ 컨테이너 안에서 새로 빌드하므로 호스트의 빌드 결과는 보낼 필요가 없다.
+#   오히려 보내면 호스트에서 만든 jar가 섞여 "내 PC에서만 되는" 이미지가 된다.
 .gradle/
-build/classes/
-build/resources/
-build/tmp/
+build/
 bin/
 
-# 소스코드 — 우리는 이미 빌드된 jar만 넣으므로 불필요
-src/
+# 이클립스/STS 메타데이터
+.classpath
+.project
+.settings/
 
 # 기타
 *.md
 .git/
+.postman/
