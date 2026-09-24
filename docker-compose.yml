@@ -35,6 +35,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    # ⭐ 서버가 재부팅돼도 DB가 스스로 올라오게 한다.
+    #   이게 빠져 있으면 재부팅 후 DB만 죽은 채로 남고,
+    #   depends_on 으로 DB를 기다리는 backend 가 계속 재시작을 반복한다.
+    #   (Docker 데몬의 자동 시작(systemctl enable docker)과 컨테이너의 자동 시작은 별개다)
+    restart: unless-stopped
 
   # ── 백엔드 : 우리 jar가 들어가므로 build 한다 ──
   backend:
